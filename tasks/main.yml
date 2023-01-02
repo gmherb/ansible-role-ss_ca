@@ -10,6 +10,9 @@
 - name: Intermediate CA Certificate
   include_tasks: initialize_intermediate.yml
 
+- name: Make the CA Bundle/Chain
+  include_tasks: mk_ca_bundle.yml
+
 - name: Server Certificate
   include_tasks: initialize_server.yml
   vars:

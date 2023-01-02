@@ -1,0 +1,6 @@
+---
+
+- name: mk_ca_bundle | Concatenate the intermediate and root ca into CA chain/bundle
+  ansible.builtin.shell: 'cat {{ cert_dir }}/intermediate/certs/intermediate.cert.pem {{ cert_dir }}/certs/ca.cert.pem > {{ cert_dir }}/intermediate/certs/ca_bundle.pem'
+  args:
+    creates: '{{ cert_dir }}/intermediate/certs/ca_bundle.pem'

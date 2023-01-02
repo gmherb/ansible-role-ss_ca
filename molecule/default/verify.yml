@@ -4,7 +4,22 @@
 - name: Verify
   hosts: all
   gather_facts: false
+  vars:
+    cert_dir: example_certs
+    server_hostnames:
+      - servera.example.com
+      - serverb.example.com
+      - example.com
+    client_hostnames:
+      - client1.example.com
+      - client2.example.com
   tasks:
-  - name: Example assertion
-    assert:
-      that: true
+
+  - name: Verify certificate with CAfile
+    ansible.builtin.command: openssl verify -verbose -CAfile {{ cert_dir }}/intermediate/certs/ca_bundle.pem {{ cert_dir }}/intermediate/certs/{{ item }}.cert.pem
+    loop: '{{ list | flatten }}'
+    vars:
+      list:
+        - '{{ server_hostnames }}'
+        - '{{ client_hostnames }}'
+    changed_when: false
