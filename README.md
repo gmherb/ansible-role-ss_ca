@@ -59,7 +59,7 @@ Each command below can take additional arguments such as `-noout`, `-text`, or e
 
 ### Create CA Chain (bundle)
 
-    $ cat ${cert_dir}/intermediate/certs/intermediate.cert.pem ${cert_dir}/certs/ca.cert.pem >  ${cert_dir}/intermediate/certs/ca_bundle.pem
+    $ cat ${cert_dir}/intermediate/certs/intermediate.cert.pem ${cert_dir}/certs/ca.cert.pem > ${cert_dir}/intermediate/certs/ca_bundle.pem
 
 ### Check certificate was signed by ca (ca_chain)
 
