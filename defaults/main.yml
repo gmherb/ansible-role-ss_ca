@@ -1,0 +1,57 @@
+---
+# defaults file for ansible-role-ss_ca
+
+# The directory where certificates are stored. Point to an empty directory to generate the CA.
+cert_dir: "my_ca"
+
+root_common_name: "Root CA"
+intermediate_common_name: "Intermediate CA"
+
+root_passphrase: "root_passphrase"
+intermediate_passphrase: "intermediate_passphrase"
+passphrase: "passphrase"
+
+# Whether to check CA validity after generation. You'll want to enable this periodically.
+# But should be disabled to speed up creation/validation of other certificates.
+check_ca_validity: false
+
+# Whether to check certificates for validity. If false, the role only stats the file and does
+# not check if the certificate is within the specified expiration warning or critical values
+check_cert_validity: true
+
+root_certificate_expiration_warn: '+50w'
+root_certificate_expiration_crit: '+25w'
+root_certificate_selfsigned_not_after: '+1024w' # 10 years
+root_certificate_selfsigned_not_before: '+0s'   # Certificate validity starts now
+
+intermediate_certificate_expiration_warn: '+50w'
+intermediate_certificate_expiration_crit: '+25w'
+intermediate_certificate_ownca_not_after: '+512w' # 5 years
+intermediate_certificate_ownca_not_before: '+0s'  # Certificate validity starts now
+
+server_hostnames: []
+server_certificate_expiration_warn: '+12w'
+server_certificate_expiration_crit: '+8w'
+server_certificate_ownca_not_after: '+55w'
+server_certificate_ownca_not_before: '+0s'  # Certificate validity starts now
+
+client_hostnames: []
+client_certificate_expiration_warn: '+12w'
+client_certificate_expiration_crit: '+8w'
+client_certificate_ownca_not_after: '+55w'
+client_certificate_ownca_not_before: '+0s'  # Certificate validity starts now
+
+server_subject_alt_name:
+  - 'DNS:*.{{ server_common_name }}'
+  - IP:127.0.0.1
+  - DNS:localhost
+
+certificate_selfsigned_digest: 'sha256'
+
+dn:
+  email_address: "admin@example.com"
+  locality_name: "SF"
+  state_or_province_name: "CA"
+  country_name: "US"
+  organization_name: "Example Org"
+  organizational_unit_name: "Example OU"

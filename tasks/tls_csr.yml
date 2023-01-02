@@ -1,0 +1,67 @@
+# Check for CSR, get csr info if exists, and generate if not present
+#
+# variable input:
+#   csr_path
+#   csr_common_name
+#   csr_subject_alt_name
+#   csr_basic_constraints
+#   csr_key_usage
+#   csr_key_usage_critical
+#   csr_extended_key_usage
+#   csr_key_usage_critical
+#   csr_authority_cert_serial_number
+#   csr_authority_cert_issuer
+#   csr_authority_key_identifier
+#   csr_subject_key_identifier
+#   csr_email_address
+#   csr_country_name
+#   csr_locality_name
+#   csr_state_or_province_name
+#   csr_organization_name
+#   csr_organizational_unit_name
+#   csr_privatekey_path
+#   csr_privatekey_passphrase
+#
+# variable output:
+#   csr_stat
+#   csr_info (when present)
+#   csr_generate (when not present)
+
+- name: tls_csr | check for csr
+  ansible.builtin.stat:
+    path: "{{ csr_path }}"
+  register: csr_stat
+
+- name: tls_csr | get csr info
+  community.crypto.openssl_csr_info:
+    path: "{{ csr_path }}"
+  register: csr_info
+  when: csr_stat.stat.exists|bool
+
+- name: tls_csr | generate csr
+  community.crypto.openssl_csr:
+    path: "{{ csr_path }}"
+    common_name: "{{ csr_common_name }}"
+    subject_alt_name: "{{ csr_subject_alt_name | default(omit) }}"
+    basic_constraints: "{{ csr_basic_constraints }}"
+    basic_constraints_critical: "{{ csr_basic_constraints_critical | default(false) }}"
+    key_usage: "{{ csr_key_usage }}"
+    key_usage_critical: "{{ csr_key_usage_critical | default(false) }}"
+    extended_key_usage: "{{ csr_extended_key_usage | default(omit) }}"
+    extended_key_usage_critical: "{{ csr_key_usage_critical | default(false) }}"
+    authority_cert_serial_number: "{{ csr_authority_cert_serial_number | default(omit) }}"
+    authority_cert_issuer: "{{ csr_authority_cert_issuer | default(omit) }}"
+    authority_key_identifier: "{{ csr_authority_key_identifier | default(omit) }}"
+    subject_key_identifier: "{{ csr_subject_key_identifier | default(omit) }}"
+    email_address: "{{ csr_email_address }}"
+    country_name: "{{ csr_country_name }}"
+    locality_name: "{{ csr_locality_name }}"
+    state_or_province_name: "{{ csr_state_or_province_name }}"
+    organization_name: "{{ csr_organization_name }}"
+    organizational_unit_name: "{{ csr_organizational_unit_name }}"
+    force: "{{ csr_force | default('no') }}"
+    privatekey_path: "{{ csr_privatekey_path }}"
+    privatekey_passphrase: "{{ csr_privatekey_passphrase }}"
+    backup: "{{ csr_backup | default('yes') }}"
+  register: csr_generate
+  when: not csr_stat.stat.exists|bool

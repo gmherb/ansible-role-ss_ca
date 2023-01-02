@@ -1,0 +1,56 @@
+---
+
+- name: Check Root CA Certificate
+  ansible.builtin.stat:
+    path: '{{ cert_dir }}/certs/ca.cert.pem'
+  register: root_ca_cert_stat
+
+- name: Root CA Private Key
+  include_tasks: tasks/tls_privatekey.yml
+  vars:
+    privatekey_path: '{{ cert_dir }}/private/ca.key.pem'
+    privatekey_passphrase: '{{ root_passphrase }}'
+  when: not root_ca_cert_stat.stat.exists|bool
+
+- name: Root CA CSR
+  include_tasks: tasks/tls_csr.yml
+  vars:
+    csr_path: '{{ cert_dir }}/csr/ca.csr.pem'
+    csr_common_name: '{{ root_common_name }}'
+    csr_basic_constraints: 'CA:TRUE'
+    csr_basic_constraints_critical: true
+    csr_key_usage:
+      - keyCertSign
+      - cRLSign
+      - digitalSignature
+    csr_key_usage_critical: yes
+    #csr_extended_key_usage:
+    #csr_extended_key_usage_critical:
+    #csr_subject_alt_name: 
+    #csr_authority_cert_serial_number:
+    #csr_authority_cert_issuer:
+    #csr_authority_key_identifier:
+    #csr_subject_key_identifier:
+    csr_email_address: '{{ dn.email_address }}'
+    csr_country_name: '{{ dn.country_name }}'
+    csr_locality_name: '{{ dn.locality_name }}'
+    csr_state_or_province_name: '{{ dn.state_or_province_name }}'
+    csr_organization_name: '{{ dn.organization_name }}'
+    csr_organizational_unit_name: '{{ dn.organizational_unit_name }}'
+    csr_privatekey_path: '{{ cert_dir }}/private/ca.key.pem'
+    csr_privatekey_passphrase: '{{ root_passphrase }}'
+  when: not root_ca_cert_stat.stat.exists|bool
+
+- name: Root CA Certificate
+  include_tasks: tasks/tls_certificate.yml
+  vars:
+    certificate_path: '{{ cert_dir }}/certs/ca.cert.pem'
+    certificate_csr_path: '{{ cert_dir }}/csr/ca.csr.pem'
+    certificate_expiration_warn: '{{ root_certificate_expiration_warn }}'
+    certificate_expiration_crit: '{{ root_certificate_expiration_crit }}'
+    certificate_provider: selfsigned
+    certificate_selfsigned_not_after: '{{ root_certificate_selfsigned_not_after }}'
+    certificate_selfsigned_not_before: '{{ root_certificate_selfsigned_not_before }}'
+    certificate_privatekey_path: '{{ cert_dir }}/private/ca.key.pem'
+    certificate_privatekey_passphrase: '{{ root_passphrase }}'
+  when: not root_ca_cert_stat.stat.exists|bool or check_ca_validity|bool

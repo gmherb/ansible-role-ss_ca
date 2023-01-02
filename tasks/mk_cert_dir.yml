@@ -1,0 +1,20 @@
+---
+# Create the root and intermediate CA directories.
+#
+# variable input:
+#   cert_dir
+#
+
+- name: mk_cert_dir | Make the required directories to store generated certificates
+  ansible.builtin.file:
+    path: '{{ cert_dir }}/{{ item }}'
+    state: directory
+  loop:
+    - ''
+    - certs
+    - csr
+    - private
+    - intermediate
+    - intermediate/certs
+    - intermediate/csr
+    - intermediate/private

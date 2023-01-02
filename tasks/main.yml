@@ -1,0 +1,25 @@
+---
+# tasks file for ansible-role-ss_ca
+
+- name: Make the certificate directory
+  include_tasks: mk_cert_dir.yml
+
+- name: Root CA Certificate
+  include_tasks: initialize_ca.yml
+
+- name: Intermediate CA Certificate
+  include_tasks: initialize_intermediate.yml
+
+- name: Server Certificate
+  include_tasks: initialize_server.yml
+  vars:
+    server_common_name: '{{ item }}'
+  loop: '{{ server_hostnames }}'
+  when: server_hostnames | length > 0
+
+- name: Client Certificate
+  include_tasks: initialize_usr_cert.yml
+  vars:
+    client_common_name: '{{ item }}'
+  loop: '{{ client_hostnames }}'
+  when: client_hostnames | length > 0

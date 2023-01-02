@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include ss_ca"
+      include_role:
+        name: "ansible-role-ss_ca"
+      vars:
+        server_hostnames:
+          - servera.example.com
+          - serverb.example.com
+          - web1.example.com
+          - example.com
+        client_hostnames:
+          - client1.example.com
+          - client2.example.com

@@ -1,0 +1,61 @@
+# Check for certificate, get certificate info if exists, and generate if not present
+#
+# variable input:
+#   certificate_path
+#
+#   certificate_expiration_warn
+#   certificate_expiration_crit
+#
+#   certificate_provider
+#   certificate_csr_path
+#   certificate_privatekey_path
+#   certificate_privatekey_passphrase
+#   certificate_selfsigned_digest
+#   certificate_selfsigned_not_after
+#   certificate_selfsigned_not_before
+#   certificate_ownca_not_after
+#   certificate_ownca_not_before
+#   certificate_ownca_path
+#   certificate_ownca_privatekey_passphrase
+#   certificate_ownca_privatekey_path
+#   certificate_ownca_digest
+#   certificate_force
+#
+# variable output:
+#   certificate_stat
+#   certificate_info (when present)
+#   certificate_generate (when not present)
+
+- name: tls_certificate | check for certificate
+  ansible.builtin.stat:
+    path: "{{ certificate_path }}"
+  register: certificate_stat
+
+- name: tls_certificate | get certificate info
+  openssl_certificate_info:
+    path: "{{ certificate_path }}"
+    valid_at:
+      crit: "{{ certificate_expiration_crit | default('+4w') }}"
+      warn: "{{ certificate_expiration_warn | default('+12w') }}"
+  register: certificate_info
+  when: certificate_stat.stat.exists|bool
+
+- name: tls_certificate | generate certificate
+  community.crypto.x509_certificate:
+    provider: "{{ certificate_provider }}"
+    path: "{{ certificate_path }}"
+    csr_path: "{{ certificate_csr_path }}"
+    privatekey_path: "{{ certificate_privatekey_path | default(omit) }}"
+    privatekey_passphrase: "{{ certificate_privatekey_passphrase | default(omit) }}"
+    selfsigned_digest: "{{ certificate_selfsigned_digest | default(omit) }}"
+    selfsigned_not_after: "{{ certificate_selfsigned_not_after | default(omit) }}"
+    selfsigned_not_before: "{{ certificate_selfsigned_not_before | default(omit) }}"
+    ownca_not_after: "{{ certificate_ownca_not_after | default(omit) }}"
+    ownca_not_before: "{{ certificate_ownca_not_before | default(omit) }}"
+    ownca_path: "{{ certificate_ownca_path | default(omit) }}"
+    ownca_privatekey_passphrase: "{{ certificate_ownca_privatekey_passphrase | default(omit) }}"
+    ownca_privatekey_path: "{{ certificate_ownca_privatekey_path | default(omit) }}"
+    ownca_digest: "{{ certificate_ownca_digest | default(omit) }}"
+    force: "{{ certificate_force | default('no') }}"
+  when: not certificate_stat.stat.exists|bool
+  register: certificate_generate

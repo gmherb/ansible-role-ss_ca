@@ -1,0 +1,37 @@
+# Check for Private Key, get key info if exists, and generate if not present
+#
+# variable input:
+#   privatekey_path
+
+#   privatekey_passphrase
+#   privatekey_return_private_key_data
+#
+#   privatekey_force
+#   privatekey_cipher
+#
+# variable output:
+#   privatekey_stat
+#   privatekey_info (when present)
+#   privatekey_generate (when not present)
+
+- name: tls_privatekey | check for private key
+  ansible.builtin.stat:
+    path: "{{ privatekey_path }}"
+  register: privatekey_stat
+
+- name: tls_privatekey | get private key info
+  community.crypto.openssl_privatekey_info:
+    path: "{{ privatekey_path }}"
+    passphrase: "{{ privatekey_passphrase }}"
+    return_private_key_data: "{{ privatekey_return_private_key_data | default('no') }}"
+  register: privatekey_info
+  when: privatekey_stat.stat.exists|bool
+
+- name: tls_privatekey | generate private key
+  community.crypto.openssl_privatekey:
+    path: "{{ privatekey_path }}"
+    passphrase: "{{ privatekey_passphrase }}"
+    force: "{{ privatekey_force | default('no') }}"
+    cipher: "{{ privatekey_cipher | default('auto') }}"
+  when: not privatekey_stat.stat.exists|bool
+  register: privatekey_generate
